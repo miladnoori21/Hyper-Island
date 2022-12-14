@@ -1,0 +1,61 @@
+import tweepy
+# from tweepy import *
+import pandas as pd
+# import pandas as pd
+import csv
+# import re
+import string
+# import preprocessor as p
+
+consumer_key = "csTv9k2Bz37NjR8ls4sdryYjq"
+consumer_secret = "OtAQie4avy5iK7SB1siDHbJf6FJ2N7XHNNPL5y9ysRS4r0MNaZ"
+access_key = "1600838543844282368-MjUtQh54KxLyoyofLT77cc4JpuLNHI"
+access_secret = "rKTYFEEHkYGOJxThsUY5m1Z7N3ti07DT44dK228ymUckD"
+
+auth = tweepy.OAuthHandler("9Z9YKdaix5PzXpvKA1f3py7x1", "OFmp74Tc7wshjKHkGc4Oq6dtCN8z8MmKh9wmp5mob9287A8bU7")
+auth.set_access_token("1488201332028846081-yQkMfBw8grTE3jIhJpNZkKlpkjYU3w", "l5Hf023aBaPyH7nds2GIigpqCd9IgTxxx7caUVSFLPyDM")
+api = tweepy.API(auth,wait_on_rate_limit=True)
+
+
+csvFile = open('/Users/Noori/Desktop/MohsenShekari.csv', 'a', encoding='utf-8')
+csvWriter = csv.writer(csvFile)
+
+search_words = "#MohsenShekari"
+new_search = search_words
+
+
+def _remove_new_line(line: str):
+    return line.replace("\n", "  ")
+
+
+column_name = ["Username", "Text", "language", "retweet_count", "Time", "location"]
+csvWriter.writerow(column_name)
+
+
+for tweet in tweepy.Cursor(api.search_tweets, q=new_search, count=1000, since_id=0, tweet_mode='extended').items():
+    if tweet.lang != 'en':
+        continue
+
+    twt_text = ""
+    if hasattr(tweet, "retweeted_status"):
+        try:
+            twt_text = tweet.retweeted_status.extened_tweet["full_text"]
+        except AttributeError:
+            twt_text = tweet.retweeted_status.full_text
+
+    else:
+        try:
+            twt_text = tweet.extended_tweet["full_text"]
+        except AttributeError:
+
+            
+            twt_text = tweet.full_text
+
+    tweet_data = [
+        tweet.user.screen_name,
+        _remove_new_line(twt_text),
+        tweet.lang,
+        tweet.retweet_count,tweet.created_at,
+        tweet.user.location]
+
+    csvWriter.writerow(tweet_data)
